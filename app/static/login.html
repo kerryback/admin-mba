@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIAI Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #7C7E7F; color: #333; height: 100vh; }
+        .banner { text-align: center; padding: 24px 0 8px; }
+        .banner h1 { font-size: 1.5em; margin: 0; color: #ffffff; }
+        .banner p { margin: 4px 0; font-size: 0.95em; color: #e0e0e0; }
+        .card { max-width: 420px; margin: 40px auto; background: #ffffff; border-radius: 4px; padding: 32px; box-shadow: 0 0 20px rgba(0,0,0,0.2), 0 5px 5px rgba(0,0,0,0.24); }
+        .card h2 { margin: 0 0 20px; font-size: 1.1em; text-align: center; color: #333; font-weight: normal; }
+        label { display: block; margin-bottom: 4px; font-size: 0.85em; color: #555; }
+        input { width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 4px; background: #f2f2f2; color: #333; font-size: 1em; box-sizing: border-box; }
+        input:focus { outline: none; border-color: #00205B; }
+        button { padding: 10px; border: none; border-radius: 4px; background: #00205B; color: #ffffff; font-size: 1em; font-weight: 600; cursor: pointer; text-transform: uppercase; }
+        button:hover { background: #00205B; filter: brightness(85%); }
+        .btn-full { width: 100%; }
+        .error { color: #cc0000; text-align: center; margin-bottom: 12px; font-size: 0.9em; display: none; }
+        .pw-container { position: relative; }
+        .pw-container input { padding-right: 60px; }
+        .pw-toggle { position: absolute; right: 8px; top: 8px; background: none; border: none; color: #555; font-size: 0.8em; text-transform: none; font-weight: normal; padding: 4px 8px; }
+        .pw-toggle:hover { background: none; filter: none; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <h1>BIAI Admin</h1>
+        <p>User Management Console</p>
+    </div>
+    <div class="card">
+        <h2>Admin Login</h2>
+        <p class="error" id="error"></p>
+        <form id="login-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" required autofocus>
+            <label for="password">Password</label>
+            <div class="pw-container">
+                <input type="password" id="password" required>
+                <button type="button" class="pw-toggle" id="toggle-pw">Show</button>
+            </div>
+            <button type="submit" class="btn-full" id="submit-btn">Log In</button>
+        </form>
+    </div>
+    <script>
+        if (localStorage.getItem('token')) {
+            window.location.href = '/index.html';
+        }
+
+        document.getElementById('toggle-pw').addEventListener('click', function() {
+            const pw = document.getElementById('password');
+            const show = pw.type === 'password';
+            pw.type = show ? 'text' : 'password';
+            this.textContent = show ? 'Hide' : 'Show';
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorEl = document.getElementById('error');
+            const btn = document.getElementById('submit-btn');
+            errorEl.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value,
+                        password: document.getElementById('password').value,
+                    }),
+                });
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.detail || 'Login failed');
+                }
+                const data = await res.json();
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userName', data.name);
+                localStorage.setItem('isAdmin', data.is_admin);
+                window.location.href = '/index.html';
+            } catch (err) {
+                errorEl.textContent = err.message;
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Log In';
+            }
+        });
+    </script>
+</body>
+</html>
