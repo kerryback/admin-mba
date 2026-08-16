@@ -429,7 +429,7 @@ def phase4(state: dict, config: argparse.Namespace):
         # student's ~/.claude/skills, putting a junk ._SKILL.md beside every
         # real one.
         run(
-            f"COPYFILE_DISABLE=1 tar -C {LAB_REPO} "
+            f"COPYFILE_DISABLE=1 tar -C {LAB_REPO} --no-xattrs "
             f"--exclude=.git --exclude=__pycache__ --exclude='._*' -czf - . | "
             f"ssh -o StrictHostKeyChecking=no root@{ip} 'tar -C /opt/biai-vm -xzf -'",
             timeout=300,
