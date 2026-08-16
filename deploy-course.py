@@ -35,10 +35,12 @@ DNSIMPLE_ZONE = "rice-business.org"
 
 # qwen-lab-key,kerry-macbook — both, so the droplet stays reachable from either
 DO_SSH_KEY = "55571350,56873206"
-# Deliberately small. The droplet is resized before students are added — see
-# "Sizing for ~120 containers" in the lab-mba repo's CLAUDE.md.
-DO_DROPLET_SIZE = "s-8vcpu-16gb"
-DO_DROPLET_REGION = "nyc3"
+# Dedicated 16 vCPU / 64 GB / 400 GB, sized for ~120 containers (see the lab-mba
+# repo's CLAUDE.md). The AMD gd- variant is offered in nyc1 (not nyc3) and is
+# ~$90/mo cheaper than the nyc3 Intel equivalent. Requires the account's droplet
+# size limit to be raised beyond the default 8 vCPU / 32 GB (done for this org).
+DO_DROPLET_SIZE = "gd-16vcpu-64gb"
+DO_DROPLET_REGION = "nyc1"
 DO_DROPLET_IMAGE = "ubuntu-24-04-x64"
 
 # kerrybackapps has no other database, so the free slot is available.
