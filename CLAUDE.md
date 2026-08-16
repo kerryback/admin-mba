@@ -50,14 +50,18 @@ Both services share the **mba-db** PostgreSQL database on Koyeb (Postgres 16, `w
 | created_at | TIMESTAMPTZ | |
 
 ### Other tables
-- **meridian_usage_log** — per-request Anthropic API cost/token tracking
-- **meridian_alerts** — spending alerts
+- **meridian_usage_log** — per-turn token/cost tracking, one row per Claude Code
+  assistant turn. Written by `usage-harvester.py` on the lab droplet (a systemd
+  timer that tails Claude Code transcripts and inserts rows) — see the lab
+  repo's CLAUDE.md. The admin panel's usage view reads this.
+- **meridian_alerts** — spending alerts (unused).
 
-Note: these two stay empty on this deployment. They were written by the
-`biai-proxy` service, which never actually ran (it pointed at a directory the
-lab repo does not contain) and has been dropped from `deploy-course.py`.
-Containers talk to `api.anthropic.com` directly, so per-user spend is not
-metered. Restoring that requires building the proxy, not just re-enabling a unit.
+Note: this was empty in every prior course. The intended `biai-proxy` writer
+never ran (it pointed at a directory the lab repo doesn't contain) and has been
+dropped. The harvester replaces it: containers still call `api.anthropic.com`
+directly (no proxy), and usage is logged after the fact from the transcripts.
+This is **visibility only** — it does not enforce `spending_limit_cents` in real
+time; a hard cap would need an actual proxy.
 
 ## First sign-in
 

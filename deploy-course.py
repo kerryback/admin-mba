@@ -514,13 +514,21 @@ def phase4(state: dict, config: argparse.Namespace):
     # NOTE: earlier versions created a biai-proxy service pointing at
     # /opt/biai-vm/api-proxy. That directory does not exist in the lab repo, so
     # the unit could never start (it is inactive on the August server too).
-    # Dropped rather than carried forward.
+    # Dropped. Per-user usage is instead harvested from Claude Code transcripts
+    # by biai-usage-harvester (below) — no MITM proxy.
 
     # Install the container watchdog (restarts containers that fall over)
     if not state.get("watchdog_installed"):
         print("  Installing container watchdog...")
         ssh(ip, "bash /opt/biai-vm/install-container-watchdog.sh", timeout=180)
         state["watchdog_installed"] = True
+        save_state(state)
+
+    # Install the usage harvester (fills meridian_usage_log for the admin panel)
+    if not state.get("usage_harvester_installed"):
+        print("  Installing usage harvester...")
+        ssh(ip, "bash /opt/biai-vm/install-usage-harvester.sh", timeout=120)
+        state["usage_harvester_installed"] = True
         save_state(state)
 
     # Generate initial nginx config
